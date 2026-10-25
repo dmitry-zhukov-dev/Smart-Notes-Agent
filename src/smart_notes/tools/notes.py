@@ -8,6 +8,7 @@ and the note service. File-system operations remain in the service.
 from smart_notes.services.note_service import (
     list_notes,
     read_note,
+    write_note,
 )
 
 
@@ -128,3 +129,22 @@ def prepare_note_write_tool(
         "requires_approval": True,
         "written": False,
     }
+
+def write_note_tool(
+    filename: str,
+    content: str,
+) -> dict[str, object]:
+    """Write a Markdown note after user approval."""
+    try:
+        write_note(filename, content)
+        return {
+            "success": True,
+            "filename": filename,
+            "written": True,
+        }
+    except (OSError, ValueError) as exc:
+        return {
+            "success": False,
+            "error": str(exc),
+            "written": False,
+        }

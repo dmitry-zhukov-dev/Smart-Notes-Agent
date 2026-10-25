@@ -92,3 +92,54 @@ def test_prepare_note_write_tool_rejects_non_markdown_filename():
 
     assert result["success"] is False
     assert "Markdown" in result["error"]
+
+def test_write_note_tool_writes_note(tmp_path, monkeypatch):
+    from smart_notes.tools import notes
+
+    written = {}
+
+    def fake_write_note(filename, content):
+        written["filename"] = filename
+        written["content"] = content
+
+    monkeypatch.setattr(notes, "write_note", fake_write_note)
+
+    result = notes.write_note_tool("ideas.md", "My idea")
+
+    assert result["success"] is True
+    assert result["written"] is True
+    assert result["filename"] == "ideas.md"
+    assert written == {
+        "filename": "ideas.md",
+        "content": "My idea",
+    }
+
+
+def test_write_note_tool_handles_validation_error(monkeypatch):
+    from smart_notes.tools import notes
+
+    def fake_write_note(filename, content):
+        raise ValueError("Invalid filename")
+
+    monkeypatch.setattr(notes, "write_note", fake_write_note)
+
+    result = notes.write_note_tool("../outside.md", "Content")
+
+    assert result["success"] is False
+    assert result["written"] is False
+    assert result["error"] == "Invalid filename"
+
+
+def test_write_note_tool_handles_os_error(monkeypatch):
+    from smart_notes.tools import notes
+
+    def fake_write_note(filename, content):
+        raise OSError("Disk error")
+
+    monkeypatch.setattr(notes, "write_note", fake_write_note)
+
+    result = notes.write_note_tool("ideas.md", "Content")
+
+    assert result["success"] is False
+    assert result["written"] is False
+    assert result["error"] == "Disk error"

@@ -69,3 +69,37 @@ def test_read_note_rejects_non_markdown_files(tmp_path, monkeypatch):
 
     with pytest.raises(ValueError, match="Only Markdown"):
         note_service.read_note("notes.txt")
+
+def test_write_note_creates_file_with_content(tmp_path, monkeypatch):
+    from smart_notes.services import note_service
+
+    notes_dir = tmp_path / "notes"
+    monkeypatch.setattr(note_service, "get_notes_dir", lambda: notes_dir)
+
+    note_service.write_note("ideas.md", "My new idea")
+
+    assert (notes_dir / "ideas.md").read_text(encoding="utf-8") == "My new idea"
+
+
+def test_write_note_rejects_path_traversal(tmp_path, monkeypatch):
+    from smart_notes.services import note_service
+
+    notes_dir = tmp_path / "notes"
+    monkeypatch.setattr(note_service, "get_notes_dir", lambda: notes_dir)
+
+    with pytest.raises(ValueError):
+        note_service.write_note("../outside.md", "Should not be written")
+
+    assert not (tmp_path / "outside.md").exists()
+
+
+def test_write_note_rejects_non_markdown_file(tmp_path, monkeypatch):
+    from smart_notes.services import note_service
+
+    notes_dir = tmp_path / "notes"
+    monkeypatch.setattr(note_service, "get_notes_dir", lambda: notes_dir)
+
+    with pytest.raises(ValueError):
+        note_service.write_note("notes.txt", "Should not be written")
+
+    assert not (notes_dir / "notes.txt").exists()
