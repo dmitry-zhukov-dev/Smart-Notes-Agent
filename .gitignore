@@ -29,3 +29,12 @@ Thumbs.db
 *.sqlite
 *.sqlite3
 *.db
+
+# Temporary test directories
+.pytest_tmp/
+tmp_pytest/
+brand_new_temp/
+
+# Local ACL reports and repair artifacts
+.acl_report/
+acl-repairs/

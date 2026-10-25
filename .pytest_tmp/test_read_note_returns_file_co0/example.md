@@ -1,3 +1,0 @@
-# Test note
-
-Hello, world!
